@@ -1,4 +1,5 @@
 import requests
+import smtplib
 
 def get_emails():
 	emails = {}
@@ -29,14 +30,36 @@ def get_weather_forecast():
 	temp_max = weather_json['main']['temp_max']
 	forecast = 'The circus forecast for today is ' + description + ' with a high of '
 	forecast += str(temp_max) + ' and a low of ' + str(temp_min)
-	print(forecast)
+	return forecast
+
+def send_emails(emails, schedule, forecast):
+	# connect to smtp server
+	server = smtplib.SMTP('smtp.gmail.com', '587')
+	# start encryption
+	server.starttls()
+	# login
+	password = raw_input("What's your password?")
+	from_email = 'flying.through.python@gmail.com'
+	server.login(from_email, password)
+	# send_emails
+	for to_email, name in emails.iteritems():
+		message = 'Subject : welcome to the circus\n'
+		message += 'Hi ' + name + '!\n\n'
+		message += forecast + '\n\n'
+		message += schedule + '\n\n'
+		message += 'hope to see you there!'
+		server.sendmail(from_email, to_email, message)
+	# test
+	server.quit()
 	
 def main():
 	emails = get_emails()
-	print(emails)
+	#print(emails)
 	schedule = get_schedule()
-	print(schedule)
-	get_weather_forecast()
+	#print(schedule)
+	forecast = get_weather_forecast()
+	#print(forecast)
+	send_emails(emails, schedule, forecast)
 
 # minuto 18:10
 main()
